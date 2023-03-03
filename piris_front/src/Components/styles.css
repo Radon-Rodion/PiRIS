@@ -1,0 +1,66 @@
+.form{
+
+}
+
+.form-label{
+    width: 30%;
+    margin-left: 10%;
+}
+
+.form-input{
+    width: 50%;
+}
+
+.form-buttons{
+    margin-left: 5%;
+}
+
+.text{
+    
+}
+
+.col{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.row{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    margin: 10px 0 10px;
+}
+
+.justify{
+    justify-content: space-between;
+    width: 90%;
+    margin-right: 10%;
+}
+
+header{
+    background-color: #3a3a3a;
+    font-size: 16pt;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 0 0 3px 0;
+}
+
+.header-link{
+    padding: 0 10px 0 10px;
+    color: white;
+    text-decoration: none;
+}
+
+.header-link:hover{
+    background-color: #2a2a2a;
+}
+
+.header-link-active{
+    padding: 0 10px 0 10px;
+    color: white;
+    text-decoration: none;
+    background-color: black;
+    border-bottom: 3px solid white;
+}
