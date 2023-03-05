@@ -192,7 +192,7 @@ const UserFormBody = ({ userInfo, setUserInfo }) => {
     );
 }
 
-const Required = () => {
+export const Required = () => {
     return <span style={{color: 'red'}}>*</span>;
 }
 

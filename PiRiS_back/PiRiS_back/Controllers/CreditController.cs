@@ -71,6 +71,14 @@ namespace PiRiS_back.Controllers
             return new OkObjectResult(res);
         }
 
+        [HttpGet("contract-number/{id}")]
+        [AuthFilter]
+        public async Task<IActionResult> GetNumberForNewContract(int id)
+        {
+            var userId = (await _context.Users.FirstAsync(u => u.UserName == HttpContext.User.Identity.Name)).Id;
+            return new OkObjectResult(await _contractsService.GetContractNumberAsync(_context, id, userId, false));
+        }
+
         [HttpPost("options/{id}")]
         [AuthFilter]
         public async Task<IActionResult> SignCreditContract(int? id, ContractViewModel contract)

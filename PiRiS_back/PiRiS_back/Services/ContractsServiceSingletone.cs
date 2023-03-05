@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using PiRiS_back.Enums;
@@ -64,12 +65,19 @@ namespace PiRiS_back.Services
             var newContract = new DebetContract()//TODO
             {
                 DebetContractOptionId = contract.OptionId ?? -1,
+                Number = contract.Number,
                 Account1 = newAccountForMainSum,
                 Account2 = newAccountForPercents,
                 PersonSurname = contract.PersonSurname,
                 PersonName = contract.PersonName,
                 PersonMiddlename = contract.PersonMiddlename,
+                PassportSeria = contract.PassportSeria,
+                PassportNumber = contract.PassportNumber,
+                PassportIdentityNumber = contract.PassportIdentityNumber,
+                CityLivingId = context.Cities.First(cit => cit.Name == contract.CityLiving).Id,
+                AddressLiving = contract.AddressLiving,
                 Sum = contract.Sum,
+                CurrencyId = context.Currencies.First(cur => cur.Name == contract.Currency).Id,
                 PercentPerYear = contract.PercentPerYear,
                 StartDate = AppDateTime,
                 EndDate = AppDateTime.AddMonths(contract.DurationMonth)
@@ -112,12 +120,19 @@ namespace PiRiS_back.Services
             var newContract = new CreditContract()//TODO
             {
                 CreditContractOptionId = contract.OptionId ?? -1,
+                Number = contract.Number,
                 Account1 = newAccountForMainSum,
                 Account2 = newAccountForPercents,
                 PersonSurname = contract.PersonSurname,
                 PersonName = contract.PersonName,
                 PersonMiddlename = contract.PersonMiddlename,
+                PassportSeria = contract.PassportSeria,
+                PassportNumber = contract.PassportNumber,
+                PassportIdentityNumber = contract.PassportIdentityNumber,
+                CityLivingId = context.Cities.First(cit => cit.Name == contract.CityLiving).Id,
+                AddressLiving = contract.AddressLiving,
                 Sum = contract.Sum,
+                CurrencyId = context.Currencies.First(cur => cur.Name == contract.Currency).Id,
                 PercentPerYear = contract.PercentPerYear,
                 StartDate = AppDateTime,
                 EndDate = AppDateTime.AddMonths(contract.DurationMonth)
@@ -127,6 +142,13 @@ namespace PiRiS_back.Services
             await context.Accounts.AddAsync(newAccountForPercents);
             await context.CreditContracts.AddAsync(newContract);
             await context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetContractNumberAsync(ApplicationDbContext context, int optionId, int userId, bool isDebet = true)
+        {
+            var contractOptionsLastId = isDebet ? await context.DebetContractOptions.MaxAsync(op => op.Id) : await context.CreditContractOptions.MaxAsync(op => op.Id);
+            string res = String.Format("%d5%d3%d4", contractOptionsLastId, optionId, userId);
+            return res;
         }
 
         public async Task SkipDayAsync(ApplicationDbContext context, AccountsService accountsService)

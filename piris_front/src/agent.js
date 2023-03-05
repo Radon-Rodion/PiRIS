@@ -24,7 +24,8 @@ const requests = {
         disabilities: () => axios.get(server+'/staticData/disabilities'),
         familyStatuses: () => axios.get(server+'/staticData/familyStatuses'),
         cities: () => axios.get(server+'/staticData/cities'),
-        currencies: () => axios.get(server + '/staticData/currencies')
+        currencies: () => axios.get(server + '/staticData/currencies'),
+        appDate: () => axios.get(server + '/staticData/app-date')
     },
     transactions: {
         current: () => axios.get(server+'/transactions'),
@@ -37,6 +38,7 @@ const requests = {
         allContracts: () => axios.get(server+'/debet/all'),
         allOptions: () => axios.get(server+'/debet/options'),
         option: (id) => axios.get(server+`/debet/options/${id}`),
+        contractNumber: (id) => axios.get(server+`/debet/contract-number/${id}`),
         sign: (id, contractViewModel) => axios.post(server+`/debet/options/${id}`, contractViewModel)
     },
     credit: {
@@ -45,6 +47,7 @@ const requests = {
         allContracts: () => axios.get(server+'/credit/all'),
         allOptions: () => axios.get(server+'/credit/options'),
         option: (id) => axios.get(server+`/credit/options/${id}`),
+        contractNumber: (id) => axios.get(server+`/credit/contract-number/${id}`),
         sign: (id, contractViewModel) => axios.post(server+`/credit/options/${id}`, contractViewModel)
     }
 };

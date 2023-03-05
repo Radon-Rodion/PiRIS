@@ -1,10 +1,25 @@
 
 
-const ContractInfo = ({ info }) => {
+const ContractInfo = ({ info, isDebet }) => {
+    const titlePart = isDebet ? 'Дебеторский' : 'Кредиторский';
+
     return (
-        <div className='col'>
-            <p className='text row'>Фамилия: <span>{info.surname}</span></p>
-        </div>
+        <>
+            <h5 style={{ textAlign: 'center', width: '100%' }}>{titlePart} договор №{info.number}</h5>
+
+            Я, {info.personSurname}&nbsp;{info.personName}&nbsp;{info.personMiddlename},
+            проживающий по адресу г. {info.cityLiving},&nbsp;{info.addressLiving}
+            , согласен заключить договор "{info.name}" на сумму&nbsp;{info.sum}{info.currency}
+            на период {info.durationMonth}&nbsp;месяцев&nbsp;
+            (с {info.startDate} по {info.endDate}) 
+            под {info.percentPerYear}% в год.
+            Серия и номер пасспорта:&nbsp;{info.passportSeria}{info.passportNumber}.
+            Идентификационный номер пасспорта:&nbsp;{info.passportIdentityNumber}.<br />
+
+            <div className="row justify">
+                <div>Дата: {info.startDate}</div>
+            </div>
+        </>
     );
 }
 

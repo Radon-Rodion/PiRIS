@@ -14,12 +14,12 @@ import UsersListPage from './Pages/UsersListPage';
 import Header from './Components/Header';
 import DebetContractsPage from './Pages/DebetContractsPage';
 import DebetOptionsPage from './Pages/DebetOptionsPage';
-import DebetContractPage from './Pages/DebetContractPage';
 import CreditContractsPage from './Pages/CreditContractsPage';
 import CreditOptionsPage from './Pages/CreditOptionsPage';
-import CreditContractPage from './Pages/CreditContractPage';
 import TransactionsPage from './Pages/TransactionsPage';
 import SignContractPage from './Pages/SignContractPage';
+import ContractOptionPage from './Pages/ContractOptionPage';
+import ContractPage from './Pages/ContractPage';
 
 
 function App() {
@@ -31,13 +31,17 @@ function App() {
     { path: '/users/user/:id', name: undefined, element: < UserMainPage />, authorizationLevel: 2 },
     { path: '/users/edit/:id', name: undefined, element: < EditUserPage />, authorizationLevel: 2 },
     {path: '/debet/contracts', name: 'Вклады', element: <DebetContractsPage/>, authorizationLevel: 1},
-    {path: '/debet/contract/:id', name: undefined, element: <DebetContractPage />, authorizationLevel: 1},
+    {path: '/debet/contract/:id', name: undefined, element: <ContractPage isDebet={true}/>, authorizationLevel: 1},
     {path: '/debet/options', name: 'Варианты вкладов', element: <DebetOptionsPage />, authorizationLevel: 1},
-    {path: '/debet/options/:id', name: undefined, element: < SignContractPage isDebet={true}/>, authorizationLevel: 1},
+    {path: '/debet/options/:id', name: undefined, element: < ContractOptionPage isDebet={true}/>, authorizationLevel: 1},
+    {path: '/debet/options/sign/:id', name: undefined, element: < SignContractPage isDebet={true}/>, authorizationLevel: 1},
+
     {path: '/credit/contracts', name: 'Кредиты', element: <CreditContractsPage/>, authorizationLevel: 1},
-    {path: '/credit/contract/:id', name: undefined, element: <CreditContractPage />, authorizationLevel: 1},
+    {path: '/credit/contract/:id', name: undefined, element: <ContractPage isDebet={false}/>, authorizationLevel: 1},
+    {path: '/credit/options/:id', name: undefined, element: < ContractOptionPage isDebet={false}/>, authorizationLevel: 1},
     {path: '/credit/options', name: 'Варианты кредитов', element: <CreditOptionsPage />, authorizationLevel: 1},
     {path: '/credit/options/:id', name: undefined, element: < SignContractPage isDebet={false}/>, authorizationLevel: 1},
+    {path: '/credit/options/sign/:id', name: undefined, element: < SignContractPage isDebet={false}/>, authorizationLevel: 1},
     // {path: '/transactions', name: 'Статистика счетов', element: < TransactionsPage showAll={false}/>, authorizationLevel: 1},
     // {path: '', name: '', element: < />, authorizationLevel: 1},
     { path: '/users/all', name: 'Список пользователей', element: <UsersListPage />, authorizationLevel: 2 },

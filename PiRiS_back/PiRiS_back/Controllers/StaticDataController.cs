@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PiRiS_back.Middleware;
+using PiRiS_back.Services;
 
 namespace PiRiS_back.Controllers
 {
@@ -9,10 +10,12 @@ namespace PiRiS_back.Controllers
     public class StaticDataController: ControllerBase
     {
         ApplicationDbContext _context;
+        ContractsServiceSingletone _contractsService;
 
-        public StaticDataController(ApplicationDbContext context)
+        public StaticDataController(ApplicationDbContext context, ContractsServiceSingletone contractsService)
         {
             _context = context;
+            _contractsService = contractsService;
         }
 
         [HttpGet("roles")]
@@ -41,6 +44,12 @@ namespace PiRiS_back.Controllers
         public async Task<IActionResult> GetCurrencies()
         {
             return new OkObjectResult(await _context.Currencies.ToListAsync());
+        }
+
+        [HttpGet("app-date")]
+        public IActionResult GetAppDate()
+        {
+            return new OkObjectResult(_contractsService.AppDateTime);
         }
 
         [HttpGet("disabilities")]
