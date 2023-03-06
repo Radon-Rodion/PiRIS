@@ -1,0 +1,16 @@
+.App {
+  text-align: center;
+}
+
+.row{
+  display: flex;
+}
+
+.col{
+  display: flex;
+  flex-direction: column;
+}
+
+.justify{
+  justify-content: space-between;
+}

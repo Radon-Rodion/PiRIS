@@ -34,7 +34,7 @@ namespace PiRiS_back.Controllers
             return new OkObjectResult(_context.DebetContracts.Where(con => con.Account1Id == user.Id).ToList());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("contract-number/{id}")]
         [AuthFilter]
         public async Task<IActionResult> GetNumberForNewContract(int id)
         {

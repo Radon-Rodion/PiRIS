@@ -40,10 +40,15 @@ namespace PiRiS_back.Controllers
         }
 
         [HttpPost("perform")]
-        [AuthFilter]
         public async Task<IActionResult> PerformTransaction()
         {
-            return new StatusCodeResult(201);
+            return new StatusCodeResult(201); //TODO
+        }
+
+        [HttpPost("getMoney")]
+        public async Task<IActionResult> GetMoney()
+        {
+            return new StatusCodeResult(201); //TODO
         }
     }
 }

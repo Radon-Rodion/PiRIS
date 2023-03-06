@@ -21,13 +21,12 @@ namespace PiRiS_back.Services
             _config = config;
         }
 
-        public async Task<List<Transaction>> GetUserTransactionsAsync(string userName, ApplicationDbContext context)
+        public async Task<List<AccountStatesViewModel>> GetUserTransactionsAsync(string userName, ApplicationDbContext context)
         {
             var user = await context.Users.FirstAsync(u => u.UserName == userName);
             try
             {
-                var userAccounts = context.Accounts.Where(acc => acc.UserId == user.Id).Select(acc => acc.Number);
-                return await context.Transactions.Where(tr => userAccounts.Contains(tr.NumberFrom) || userAccounts.Contains(tr.NumberTo)).ToListAsync();
+                return await context.Accounts.Where(acc => acc.UserId == user.Id).Select(acc => new AccountStatesViewModel(acc, context)).ToListAsync();
             } catch (NullReferenceException)
             {
                 throw new TransactionValidationException($"No transactions found for user: {userName}!");
@@ -40,6 +39,8 @@ namespace PiRiS_back.Services
             var user = await context.Users.FirstAsync(u => u.UserName == userName);
             var bankAcountActive = await context.Accounts.FirstAsync(ac => ac.Number == _config.Value.BankAccountActive);
             var bankAccountPassive = await context.Accounts.FirstAsync(ac => ac.Number == _config.Value.BankAccountPassive);
+            var contractCurrency = await context.Currencies.FirstOrDefaultAsync(cur => cur.Name == contract.Currency);
+            if (contractCurrency is null) throw new ContractValidationException($"Неизвестная валюта: {contract.Currency}!");
 
             var newAccountForMainSum = new Account()
             {
@@ -58,9 +59,9 @@ namespace PiRiS_back.Services
                 IsActive = false
             };
 
-            await accountsService.CreateTransactionAsync("", false, newAccountForMainSum.Number, true, contract.Sum, context, AppDateTime); //To cassa debet
-            await accountsService.CreateTransactionAsync(bankAcountActive, false, newAccountForMainSum, false, contract.Sum, context, AppDateTime); //From cassa credit to main credit
-            await accountsService.CreateTransactionAsync(newAccountForMainSum, true, bankAccountPassive, false, contract.Sum, context, AppDateTime); //From main debet to bank credit
+            await accountsService.CreateTransactionAsync("", false, newAccountForMainSum.Number, true, contract.Sum, contractCurrency, context, AppDateTime); //To cassa debet
+            await accountsService.CreateTransactionAsync(bankAcountActive, false, newAccountForMainSum, false, contract.Sum, contractCurrency, context, AppDateTime); //From cassa credit to main credit
+            await accountsService.CreateTransactionAsync(newAccountForMainSum, true, bankAccountPassive, false, contract.Sum, contractCurrency, context, AppDateTime); //From main debet to bank credit
 
             var newContract = new DebetContract()//TODO
             {
@@ -94,6 +95,8 @@ namespace PiRiS_back.Services
             var user = await context.Users.FirstAsync(u => u.UserName == userName);
             var bankAcountActive = await context.Accounts.FirstAsync(ac => ac.Number == _config.Value.BankAccountActive);
             var bankAccountPassive = await context.Accounts.FirstAsync(ac => ac.Number == _config.Value.BankAccountPassive);
+            var contractCurrency = await context.Currencies.FirstOrDefaultAsync(cur => cur.Name == contract.Currency);
+            if (contractCurrency is null) throw new ContractValidationException($"Неизвестная валюта: {contract.Currency}!");
 
             var newAccountForMainSum = new Account()
             {
@@ -112,9 +115,9 @@ namespace PiRiS_back.Services
                 IsActive = true
             };
 
-            await accountsService.CreateTransactionAsync(bankAccountPassive, true, newAccountForMainSum, true, contract.Sum, context, AppDateTime); //From bank debet to main debet
-            await accountsService.CreateTransactionAsync(newAccountForMainSum, false, bankAcountActive, true, contract.Sum, context, AppDateTime); //From main credit to cassa debet
-            await accountsService.CreateTransactionAsync(newAccountForMainSum.Number, false, "", false, contract.Sum, context, AppDateTime); //From cassa credit
+            await accountsService.CreateTransactionAsync(bankAccountPassive, true, newAccountForMainSum, true, contract.Sum, contractCurrency, context, AppDateTime); //From bank debet to main debet
+            await accountsService.CreateTransactionAsync(newAccountForMainSum, false, bankAcountActive, true, contract.Sum, contractCurrency, context, AppDateTime); //From main credit to cassa debet
+            await accountsService.CreateTransactionAsync(newAccountForMainSum.Number, false, "", false, contract.Sum, contractCurrency, context, AppDateTime); //From cassa credit
 
 
             var newContract = new CreditContract()//TODO
@@ -167,26 +170,26 @@ namespace PiRiS_back.Services
         {
             var bankAccountPassive = await context.Accounts.FirstAsync(ac => ac.Number == _config.Value.BankAccountPassive);
 
-            foreach (var dc in context.DebetContracts.Include(dc => dc.Account1).Include(dc => dc.Account2))
+            foreach (var dc in context.DebetContracts.Include(dc => dc.Account1).Include(dc => dc.Account2).Include(dc => dc.Currency))
             {
                 if(dc.EndDate > AppDateTime && AppDateTime.Day == dc.StartDate.Day && AppDateTime.Month != dc.StartDate.Month) //fullfilling percents
                 {
-                    await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account2, false, (dc.PercentPerYear / 12) * dc.Sum, context, AppDateTime);
+                    await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account2, false, (dc.PercentPerYear / 12) * dc.Sum, dc.Currency, context, AppDateTime);
                 } 
                 else if(dc.EndDate == AppDateTime) //deposit end
                 {
-                    await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account1, false, dc.Sum, context, AppDateTime);
+                    await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account1, false, dc.Sum, dc.Currency, context, AppDateTime);
                 }
             }
             foreach (var dc in context.CreditContracts.Include(dc => dc.Account1).Include(dc => dc.Account2))
             {
                 if (dc.EndDate > AppDateTime && AppDateTime.Day == dc.StartDate.Day && AppDateTime.Month != dc.StartDate.Month) //paying percents
                 {
-                    await accountsService.CreateTransactionAsync(dc.Account2, false, bankAccountPassive, true, (dc.PercentPerYear / 12) * dc.Sum, context, AppDateTime);
+                    await accountsService.CreateTransactionAsync(dc.Account2, false, bankAccountPassive, true, (dc.PercentPerYear / 12) * dc.Sum, dc.Currency, context, AppDateTime);
                 }
                 else if (dc.EndDate == AppDateTime) //credit end
                 {
-                    await accountsService.CreateTransactionAsync(dc.Account1, false, bankAccountPassive, true, dc.Sum, context, AppDateTime);
+                    await accountsService.CreateTransactionAsync(dc.Account1, false, bankAccountPassive, true, dc.Sum, dc.Currency, context, AppDateTime);
                 }
             }
             await context.SaveChangesAsync();
