@@ -11,11 +11,13 @@ namespace PiRiS_back.Controllers
     {
         ApplicationDbContext _context;
         ContractsServiceSingletone _contractsService;
+        AccountsService _accountsService;
 
-        public TransactionsController(ApplicationDbContext context, ContractsServiceSingletone contractsService)
+        public TransactionsController(ApplicationDbContext context, ContractsServiceSingletone contractsService, AccountsService accountsService)
         {
             _context = context;
             _contractsService = contractsService;
+            _accountsService = accountsService;
         }
 
         [HttpGet]
@@ -32,11 +34,38 @@ namespace PiRiS_back.Controllers
             }
         }
 
-        [HttpGet("all")]
+        [HttpGet("bank")]
         [AuthFilter] //Admin only
-        public async Task<IActionResult> GetAllTransactionsList()
+        public async Task<IActionResult> GetBankTransactionsList()
         {
             return new OkObjectResult(await _context.Transactions.ToListAsync());
+        }
+
+        [HttpPost("closeDay")]
+        public async Task<IActionResult> CloseBankDay()
+        {
+            try
+            {
+                await _contractsService.SkipDayAsync(_context, _accountsService);
+                return new OkResult();
+            } catch (Exception e)
+            {
+                return new BadRequestObjectResult($"{e.Message}");
+            }
+        }
+
+        [HttpPost("closeMonth")]
+        public async Task<IActionResult> CloseBankMonth()
+        {
+            try
+            {
+                await _contractsService.SkipMonthAsync(_context, _accountsService);
+                return new OkResult();
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult($"{e.Message}");
+            }
         }
 
         [HttpPost("perform")]

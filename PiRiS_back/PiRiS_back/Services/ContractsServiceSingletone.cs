@@ -160,7 +160,7 @@ namespace PiRiS_back.Services
             await closeBankDay(context, accountsService);
         }
 
-        public async Task SkipMonth(ApplicationDbContext context, AccountsService accountsService)
+        public async Task SkipMonthAsync(ApplicationDbContext context, AccountsService accountsService)
         {
             var finishDate = AppDateTime.AddMonths(1);
             while(AppDateTime < finishDate) await SkipDayAsync(context, accountsService);

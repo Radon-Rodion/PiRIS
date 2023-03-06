@@ -29,8 +29,9 @@ const requests = {
     },
     transactions: {
         current: () => axios.get(server+'/transactions'),
-        all: () => axios.get(server+'/transactions/all'),
-        perform: (transactionViewModel) => axios.post(server+'/transactions/perform', transactionViewModel)
+        bank: () => axios.get(server+'/transactions/bank'),
+        closeDay: () => axios.post(server+'/closeDay'),
+        closeMonth: () => axios.post(server+'/closeMonth')
     },
     debet: {
         currentContracts: () => axios.get(server+'/debet'),
