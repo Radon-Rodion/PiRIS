@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react"
 import { toast } from "react-hot-toast";
 import AccContext from "../Context/AccContext";
-import PageContext, { ENTER_ACC_PIN, TAKE_CARD } from "../Context/PageContext";
+import PageContext, { CHOOSE_OPERATION, ENTER_ACC_PIN, TAKE_CARD } from "../Context/PageContext";
 import processError from "../Helpers/ProcessError";
 import requests from "../requests";
 
@@ -21,7 +21,7 @@ const EnterAccPin = () => {
 
     const enter = () => {
         requests.checkPin({acc: accNumber, pin: pinRef.current.value}).then(() => {
-            setPage(ENTER_ACC_PIN);
+            setPage(CHOOSE_OPERATION);
         }).catch(err => {
             processError(err);
             setAttemptsLeft(attemtsLeft - 1);

@@ -11,16 +11,22 @@ const ContractInfo = ({ info, isDebet }) => {
             проживающий по адресу г. {info.cityLiving},&nbsp;{info.addressLiving}
             , согласен заключить договор "{info.name}" на сумму&nbsp;{info.sum}{info.currency}
             на период {info.durationMonth}&nbsp;месяцев&nbsp;
-            (с {info.startDate} по {info.endDate}) 
-            под {info.percentPerYear}% в год.
+            (с {dateToStr(info.startDate)} по {dateToStr(info.endDate)}) 
+            под {info.percentPerYear*100}% в год.
             Серия и номер пасспорта:&nbsp;{info.passportSeria}{info.passportNumber}.
             Идентификационный номер пасспорта:&nbsp;{info.passportIdentityNumber}.<br />
 
             <div className="row justify">
-                <div>Дата: {info.startDate}</div>
+                <div>Дата: {dateToStr(info.startDate)}</div>
             </div>
         </>
     );
 }
+
+export const dateToStr = (date) => {
+    if(!date) return '';
+    date = new Date(date);
+    return `${date?.getFullYear() ?? 2023}-${(date?.getMonth() ?? 0) + 1}-${date?.getDate() ?? 1}`
+};
 
 export default ContractInfo;

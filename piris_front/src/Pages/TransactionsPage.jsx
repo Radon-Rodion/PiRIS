@@ -12,7 +12,7 @@ const TransactionsPage = ({showBank = false}) => {
     useEffect(() => {
         if(loading){
             setLoading(false);
-            const request = showBank ? requests.transactions.bank : requests.transactions.current;
+            const request = showBank ? requests.transactions.bank() : requests.transactions.current();
             request.then(res => {
                 console.log(res);
                 setAccStates(res.data);

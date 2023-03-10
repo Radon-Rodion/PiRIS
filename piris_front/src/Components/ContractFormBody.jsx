@@ -4,6 +4,7 @@ import requests from "../agent";
 import { processErrRequest } from "../Helpers/ErrReqProcessor";
 import validators from "../Helpers/Validators";
 import { Required } from "./UserFormBody";
+import {dateToStr} from './ContractInfo';
 
 
 const ContractFormBody = ({ contractInfo, setContractInfo, limiters, isDebet = true }) => {
@@ -20,7 +21,7 @@ const ContractFormBody = ({ contractInfo, setContractInfo, limiters, isDebet = t
             requests.staticData.appDate()
         ];
         axios.all(getStaticData).then(resp => {
-            const currencies = resp[1].data.filter(cur => limiters.currencies.indexOf(cur) > -1);
+            const currencies = resp[1].data?.filter(cur => limiters.currencies.indexOf(cur) > -1);
             const newStaticData = {
                 cities: resp[0].data,
                 currencies: currencies,
@@ -52,14 +53,16 @@ const ContractFormBody = ({ contractInfo, setContractInfo, limiters, isDebet = t
 
     const titlePart = isDebet ? 'Дебеторский' : 'Кредиторский';
     const addMonths = (date, months) => {
-        var d = date.getDate();
-        date.setMonth(date.getMonth() + +months);
-        if (date.getDate() != d) {
+        if(!date || !months) return date;
+        date = new Date(date);
+
+        var d = date?.getDate();
+        date.setMonth(date?.getMonth() + +months);
+        if (date?.getDate() != d) {
             date.setDate(0);
         }
         return date;
     }
-    const dateToStr = (date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
     return (
         <>
@@ -80,7 +83,7 @@ const ContractFormBody = ({ contractInfo, setContractInfo, limiters, isDebet = t
             Идентификационный номер пасспорта: <Field val={contractInfo.passportIdentityNumber} onChange={setFieldActionCreator('passportIdentityNumber', validators.passportIdentityNumber)} />.<br />
 
             <div className="row justify">
-                <div>Дата: {contractInfo.startDate}</div>
+                <div>Дата: {dateToStr(staticData.today)}</div>
             </div>
         </>
     );

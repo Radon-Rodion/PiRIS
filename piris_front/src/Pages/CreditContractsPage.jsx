@@ -22,7 +22,7 @@ const CreditContractsPage = ({ showAll = false }) => {
     return (<>
         <ModalLoader show={loading} />
         <h1 className="central">Кредиты</h1>
-        <ContractsListTable contractsList={contracts} redirectPath='/credit/contracts' />
+        <ContractsListTable contractsList={contracts} redirectPath='/credit/contracts' isDebet={false} />
     </>);
 }
 

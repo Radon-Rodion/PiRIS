@@ -8,16 +8,16 @@ const Check = React.forwardRef(({ operationReport }, ref) => (
         <p>Операция: {operationReport.operation}</p>
 
         {operationReport.sum == undefined ? undefined : (
-            <p>Сумма: operationReport.sum</p>
+            <p>Сумма: {operationReport.sum}</p>
         )}
         {operationReport.accountTo == undefined ? undefined : (
-            <p>Получатель: operationReport.accountTo</p>
+            <p>Получатель: {operationReport.accountTo}</p>
         )}
         {operationReport.debet == undefined ? undefined : (
-            <p>Дебет: operationReport.debet</p>
+            <p>Дебет: {operationReport.debet}</p>
         )}
         {operationReport.debet == undefined ? undefined : (
-            <p>Кредит: operationReport.credit</p>
+            <p>Кредит: {operationReport.credit}</p>
         )}
 
         <p>Дата и время: {new Date().toLocaleString()}</p>

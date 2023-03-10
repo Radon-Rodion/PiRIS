@@ -49,31 +49,31 @@ const SignContractPage = ({ isDebet = true }) => {
             const requestsArr = [requests.users.currentUser(), requestForOption(), requestForNumber()];
             axios.all(requestsArr).then(res => {
                 const newVM = { ...contractVM };
-                newVM.personName = res[0].personName;
-                newVM.personSurname = res[0].personSurname;
-                newVM.personMiddlename = res[0].personMiddlename;
-                newVM.passportSeria = res[0].passportSeria;
-                newVM.passportNumber = res[0].passportNumber;
-                newVM.passportIdentityNumber = res[0].passportIdentityNumber;
-                newVM.cityLiving = res[0].city;
-                newVM.addressLiving = res[0].addressLiving;
+                newVM.personName = res[0].data.name;
+                newVM.personSurname = res[0].data.surname;
+                newVM.personMiddlename = res[0].data.middlename;
+                newVM.passportSeria = res[0].data.passportSeria;
+                newVM.passportNumber = res[0].data.passportNumber;
+                newVM.passportIdentityNumber = res[0].data.passportIdentityNumber;
+                newVM.cityLiving = res[0].data.city;
+                newVM.addressLiving = res[0].data.addressLiving;
 
-                newVM.isRequestable = res[1].isRequestable;
-                newVM.isDifferentive = res[1].isDifferentive;
-                newVM.name = res[1].name;
-                newVM.description = res[1].description;
-                newVM.currency = res[1].availableCurrencies.split('/')?.[0];
-                newVM.durationMonth = res[1].minDurationInMonth ?? 0;
-                newVM.percentPerYear = res[1].percentPerYear;
+                newVM.isRequestable = res[1].data?.value?.isRequestable;
+                newVM.isDifferentive = res[1].data?.value?.isDifferentive;
+                newVM.name = res[1].data?.value?.name;
+                newVM.description = res[1].data?.value?.description;
+                newVM.currency = res[1].data?.value?.availableCurrencies?.split('/')?.[0];
+                newVM.durationMonth = res[1].data?.value?.minDurationInMonth ?? 0;
+                newVM.percentPerYear = res[1].data?.value?.percentPerYear*100;
 
-                newVM.number = res[2];
+                newVM.number = res[2].data;
 
                 const newLimiters = { ...limiters };
-                newLimiters.minDuration = res[1].minDurationInMonth ?? 0;
-                newLimiters.maxDuration = res[1].maxDurationInMonth ?? 360;
-                newLimiters.minSum = res[1].sumFrom ?? 0;
-                newLimiters.maxSum = res[1].sumTo ?? 100000000;
-                newLimiters.currencies = res[1].availableCurrencies.split('/');
+                newLimiters.minDuration = res[1].data?.value?.minDurationInMonth ?? 0;
+                newLimiters.maxDuration = res[1].data?.value?.maxDurationInMonth ?? 360;
+                newLimiters.minSum = res[1].data?.value?.sumFrom ?? 0;
+                newLimiters.maxSum = res[1].data?.value?.sumTo ?? 100000000;
+                newLimiters.currencies = res[1].data?.value?.availableCurrencies?.split('/') ?? [];
                 setLoading(false);
                 setLimiters(newLimiters);
                 setContractVM(newVM);
@@ -82,11 +82,12 @@ const SignContractPage = ({ isDebet = true }) => {
         }
     }, [])
 
-    const onSubmit = () => {
+    const onSubmit = (e) => {
+        e.preventDefault();
         const request = isDebet ? requests.debet.sign(id, contractVM) : requests.credit.sign(id, contractVM);
         request.then(resp => {
             console.log(resp);
-            navigate(-1);
+            //navigate(-1);
         }).catch(err => processErrRequest(err));
     }
 

@@ -12,7 +12,7 @@ const EnterSumForTransaction = () => {
     const { page, setPage } = useContext(PageContext);
 
     const performOperation = () => {
-        requests.transaction({accountFrom: accNumber, accountTo: operationReport.accountTo, sum: sumRef.current.value}).then(() => {
+        requests.transaction({acc: accNumber, to: operationReport.accountTo, sum: sumRef.current.value}).then(() => {
             setOperationReport({ ...operationReport, sum: `${sumRef.current.value} BYN` });
             setPage(OPERATION_COMPLETE);
         }).catch(err => processError(err));

@@ -1,6 +1,18 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import { Line } from "react-chartjs-2";
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+  } from "chart.js";
+  
+  ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 
 const AccountsStatisticsGraph = ({ data }) => {
@@ -9,17 +21,18 @@ const AccountsStatisticsGraph = ({ data }) => {
     useEffect(() => {
         const colors = ["#000000", "#ff0000", "#00ff00", "#0000ff", "#ffaa00", "#777777", "#00aaff", "#aa33aa", "#7777ff", "#ff7777", "#33ff77", "#ff00ff"];
 
-        const minDate = getMinCompared(data).minTransaction.date;
-        const maxDate = getMinCompared(data, (date1, date2) => { date1 > date2 }).minTransaction.date;
+        const minDate = getMinCompared(data).minTransaction?.date;
+        const maxDate = getMinCompared(data, (date1, date2) => ( date1 > date2 )).minTransaction?.date;
 
         const times = getTimes(minDate, maxDate);
+        
         setDiagrammData({
-            labels: data?.headers ?? [],
+            labels: times.map(t => (new Date(t))?.toDateString()) ?? [],
             datasets: data.map((dat, i) => {
                 return {
                     visible: true,
-                    data: extendDataOnAllDays(addZeroTransaction(dat.transactionList, dat.account), times),
-                    label: dat.account.number,
+                    data: extendDataOnAllDays(addZeroTransaction(dat.transactionList, dat.account, minDate), times),
+                    label: dat.account.code,
                     borderColor: colors[i],
                     backgroundColor: colors[i],
                     fill: true,
@@ -29,12 +42,11 @@ const AccountsStatisticsGraph = ({ data }) => {
         });
     }, [data]);
 
-    const changeVisibleActionCreator = (i) => {
+    const changeVisibleActionCreator = (i) => () => {
         const newDiagrammData = { ...diagrammData };
         newDiagrammData.datasets[i].visible = !newDiagrammData.datasets[i].visible;
         setDiagrammData(newDiagrammData);
     }
-
 
     return <>
         <Line
@@ -54,19 +66,12 @@ const AccountsStatisticsGraph = ({ data }) => {
             }}
             data={diagrammData}
         />
-        <div style={{ display: 'grid', gridTemplateColumns: '30% 30% 1fr' }}>
-            {diagrammData.datasets?.map((ds, i) =>
-                <span style={{ display: 'inline-block' }}>
-                    <label>{ds.label}</label>
-                    <input type="checkbox" checked={ds.visible} onClick={changeVisibleActionCreator(i)} />
-                </span>)}
-        </div>
     </>
 }
 
-const getMinCompared = (dat, compare = (date1, date2) => { date1 < date2 }) => dat.reduce((modelAccum, modelVal) => {
-    var modelAccumReduce = modelAccum?.minTransaction ?? transactionList.reduce((acc, val) => compare(acc.date, val.date) ? acc : val);
-    var modelValReduce = modelVal.transactionList.reduce((acc, val) => compare(acc.date, val.date) ? acc : val);
+const getMinCompared = (dat, compare = (date1, date2) => ( date1 < date2 )) => dat?.reduce((modelAccum, modelVal) => {
+    var modelAccumReduce = modelAccum?.minTransaction ?? modelAccum?.transactionList.reduce((acc, val) => compare(acc.date, val.date) ? acc : val);
+    var modelValReduce = modelVal.transactionList.reduce((acc, val) => compare(acc.date, val.date) ? acc : val, {date: new Date()});
     let resModel;
     if (compare(modelAccumReduce.date, modelValReduce.date)) {
         resModel = modelAccum;
@@ -76,32 +81,39 @@ const getMinCompared = (dat, compare = (date1, date2) => { date1 < date2 }) => d
         resModel.minTransaction = modelValReduce;
     }
     return resModel;
-});
+}, {minTransaction: {date: new Date()}});
 
 const addZeroTransaction = (transactions, account, minDate) => {
-    return [{
+    const res = [{
         date: minDate,
         debet: account.debet,
         credit: account.credit
-    }, ...transactions];
+    }];
+    transactions.slice().reverse().map(tr => res.push(tr));
+    return res;
 }
 
-const getTimes = (minDate = new Date(), maxDate = new Date(), intervals = 365) => {
-    const minTime = minDate.getTime();
-    const maxTime = maxDate.getTime();
-    const delta = (minTime - maxTime) / intervals;
-    return Array(intervals).fill((_, i) => minTime + i * delta);
+const getTimes = (minDate = new Date(), maxDate = new Date(), intervals = 30) => {
+    const minTime = (new Date(minDate)).getTime();
+    const maxTime = (new Date(maxDate)).getTime();
+    const delta = (maxTime - minTime) / intervals;
+    return Array(intervals+1).fill(0).map((el, i) => {
+        const res = (minTime + i * delta);
+        return res;
+    });
 }
 
 const extendDataOnAllDays = (transactions, times = []) => {
-
+    console.log('Tra', transactions);
     let curIndex = 0;
 
     return times.map(time => {
-        while (transactions[curIndex]?.date?.getTime() <= time && curIndex < transactions.length - 1) {
+        console.log(transactions[curIndex], new Date(time));
+        while (curIndex < transactions.length - 1 && (new Date(transactions[curIndex+1]?.date)).getTime() <= time) {
+            
             curIndex++;
         }
-        return transactions[curIndex]?.debet - transactions[curIndex]?.credit;
+        return transactions[curIndex]?.debet + transactions[curIndex]?.credit;
     })
 }
 

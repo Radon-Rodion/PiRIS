@@ -30,8 +30,8 @@ const requests = {
     transactions: {
         current: () => axios.get(server+'/transactions'),
         bank: () => axios.get(server+'/transactions/bank'),
-        closeDay: () => axios.post(server+'/closeDay'),
-        closeMonth: () => axios.post(server+'/closeMonth')
+        closeDay: () => axios.post(server+'/transactions/closeDay'),
+        closeMonth: () => axios.post(server+'/transactions/closeMonth')
     },
     debet: {
         currentContracts: () => axios.get(server+'/debet'),
@@ -40,7 +40,7 @@ const requests = {
         allOptions: () => axios.get(server+'/debet/options'),
         option: (id) => axios.get(server+`/debet/options/${id}`),
         contractNumber: (id) => axios.get(server+`/debet/contract-number/${id}`),
-        sign: (id, contractViewModel) => axios.post(server+`/debet/options/${id}`, contractViewModel)
+        sign: (id, contractViewModel) => axios.post(server+`/debet/options/${id}`, contractViewModel, { headers: { 'Content-Type': 'multipart/form-data' } })
     },
     credit: {
         currentContracts: () => axios.get(server+'/credit'),
@@ -49,7 +49,7 @@ const requests = {
         allOptions: () => axios.get(server+'/credit/options'),
         option: (id) => axios.get(server+`/credit/options/${id}`),
         contractNumber: (id) => axios.get(server+`/credit/contract-number/${id}`),
-        sign: (id, contractViewModel) => axios.post(server+`/credit/options/${id}`, contractViewModel)
+        sign: (id, contractViewModel) => axios.post(server+`/credit/options/${id}`, contractViewModel, { headers: { 'Content-Type': 'multipart/form-data' } })
     }
 };
 

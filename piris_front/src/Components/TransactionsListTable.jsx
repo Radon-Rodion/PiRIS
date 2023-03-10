@@ -54,10 +54,10 @@ const TransactionsListTable = ({accState}) => {
     ];
 
     return <>
-        Счёт: {accState.account.number}
+        Счёт: {accState.account.code} {accState.account.number}
         <DataGrid
             headerHeight={100}
-            rowHeight={52}
+            rowHeight={27}
             rows={accState.transactionList}
             columns={columns}
             getRowId={(x) => x.id}
@@ -65,7 +65,7 @@ const TransactionsListTable = ({accState}) => {
             pageSize={10}
             pagination
             sx={{
-                height: '75vh',
+                height: '35vh',
                 my: '35px',
                 '& .MuiDataGrid-columnHeaderTitle': {
                     textOverflow: "clip",

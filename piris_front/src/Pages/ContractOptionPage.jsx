@@ -20,7 +20,7 @@ const ContractOptionPage = ({ isDebet = true }) => {
             request.then(res => {
                 console.log(res);
                 setLoading(false);
-                setContractInfo(res.data);
+                setContractInfo(res.data.value);
             }).catch(err => {
                 console.err(err);
                 processErrRequest(err);

@@ -9,10 +9,10 @@ namespace PiRiS_back.ViewModels
         public string Number { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
-        public string Account1Number { get; set; }
-        public string Account2Number { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public string? Account1Number { get; set; }
+        public string? Account2Number { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public bool? IsRequestable { get; set; }
         public bool? IsDifferentive { get; set; }
         public int DurationMonth { get; set; }
@@ -41,18 +41,22 @@ namespace PiRiS_back.ViewModels
             StartDate = contract.StartDate;
             EndDate = contract.EndDate;
             IsRequestable = contract?.DebetContractOption?.IsRequestable;
-            DurationMonth = (int)Math.Round((contract.StartDate - contract.EndDate).TotalDays / 30);
+            DurationMonth = (int)Math.Round((contract.EndDate - contract.StartDate).TotalDays / 30);
             PersonName = contract.PersonName;
             PersonSurname = contract.PersonSurname;
             PersonMiddlename = contract.PersonMiddlename;
             PassportSeria= contract.PassportSeria;
             PassportNumber= contract.PassportNumber;
             PassportIdentityNumber= contract.PassportIdentityNumber;
-            CityLiving = context.Cities.First(cit => cit.Id == contract.CityLivingId).Name;
             AddressLiving = contract.AddressLiving;
             Sum = contract.Sum;
-            Currency = context.Currencies.First(cur => cur.Id == contract.CurrencyId).Name;
             PercentPerYear = contract.PercentPerYear;
+            try
+            {
+                CityLiving = context.Cities.First(cit => cit.Id == contract.CityLivingId).Name;
+                Currency = context.Currencies.First(cur => cur.Id == contract.CurrencyId).Name;
+            }
+            catch (InvalidOperationException ex) { };
     }
 
         public ContractViewModel(CreditContract contract, ApplicationDbContext context)
@@ -67,18 +71,22 @@ namespace PiRiS_back.ViewModels
             StartDate = contract.StartDate;
             EndDate = contract.EndDate;
             IsDifferentive = contract?.CreditContractOption?.IsDifferentive;
-            DurationMonth = (int)Math.Round((contract.StartDate - contract.EndDate).TotalDays / 30);
+            DurationMonth = (int)Math.Round((contract.EndDate - contract.StartDate).TotalDays / 30);
             PersonName = contract.PersonName;
             PersonSurname = contract.PersonSurname;
             PersonMiddlename = contract.PersonMiddlename;
             PassportSeria = contract.PassportSeria;
             PassportNumber = contract.PassportNumber;
             PassportIdentityNumber = contract.PassportIdentityNumber;
-            CityLiving = context.Cities.First(cit => cit.Id == contract.CityLivingId).Name;
             AddressLiving = contract.AddressLiving;
             Sum = contract.Sum;
-            Currency = context.Currencies.First(cur => cur.Id == contract.CurrencyId).Name;
             PercentPerYear = contract.PercentPerYear;
+            try
+            {
+                CityLiving = context.Cities.First(cit => cit.Id == contract.CityLivingId).Name;
+                Currency = context.Currencies.First(cur => cur.Id == contract.CurrencyId).Name;
+            }
+            catch (InvalidOperationException) { }
         }
     }
 }

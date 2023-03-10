@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { NavLink } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 
-const ContractsListTable = ({ contractsList, redirectPath }) => {
+const ContractsListTable = ({ contractsList, redirectPath, isDebet = true }) => {
     const columns = [
         {
             field: 'id',
@@ -11,7 +11,7 @@ const ContractsListTable = ({ contractsList, redirectPath }) => {
             headerClassName: 'subtext',
             headerAlign: 'left',
             align: 'left',
-            renderCell: (props) => (<NavLink to={redirectPath+props.row.id}>{props.row.id}</NavLink>)
+            renderCell: (props) => (<NavLink to={redirectPath+'/'+props.row.id}>{props.row.id}</NavLink>)
         },
         {
             field: 'name',
@@ -21,7 +21,7 @@ const ContractsListTable = ({ contractsList, redirectPath }) => {
             headerAlign: 'left',
             align: 'left'
         },
-        {
+        isDebet ? {
             field: 'isRequestable',
             headerName: 'Отзывной',
             flex: 0.15,
@@ -29,6 +29,14 @@ const ContractsListTable = ({ contractsList, redirectPath }) => {
             headerAlign: 'left',
             align: 'left',
             renderCell: (props) => (props.row.isRequestable ? 'Да' : 'Нет')
+        } : {
+            field: 'isDifferentive',
+            headerName: 'Дифференцированный',
+            flex: 0.15,
+            headerClassName: 'subtext',
+            headerAlign: 'left',
+            align: 'left',
+            renderCell: (props) => (props.row.isDifferentive ? 'Да' : 'Нет')
         },
         {
             field: 'sum',

@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using PiRiS_back.Enums;
 using PiRiS_back.Middleware;
+using PiRiS_back.Models;
 using PiRiS_back.Services;
+using PiRiS_back.ViewModels;
 
 namespace PiRiS_back.Controllers
 {
@@ -11,12 +15,14 @@ namespace PiRiS_back.Controllers
     {
         ApplicationDbContext _context;
         ContractsServiceSingletone _contractsService;
+        readonly IOptions<BankAccConfig> _config;
         AccountsService _accountsService;
 
-        public TransactionsController(ApplicationDbContext context, ContractsServiceSingletone contractsService, AccountsService accountsService)
+        public TransactionsController(ApplicationDbContext context, ContractsServiceSingletone contractsService, AccountsService accountsService, IOptions<BankAccConfig> config)
         {
             _context = context;
             _contractsService = contractsService;
+            _config = config;
             _accountsService = accountsService;
         }
 
@@ -38,7 +44,14 @@ namespace PiRiS_back.Controllers
         [AuthFilter] //Admin only
         public async Task<IActionResult> GetBankTransactionsList()
         {
-            return new OkObjectResult(await _context.Transactions.ToListAsync());
+            try
+            {
+                return new OkObjectResult(await _contractsService.GetBankTransactionsAsync(_context));
+            }
+            catch (TransactionValidationException ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
         }
 
         [HttpPost("closeDay")]
@@ -69,15 +82,21 @@ namespace PiRiS_back.Controllers
         }
 
         [HttpPost("perform")]
-        public async Task<IActionResult> PerformTransaction()
+        public async Task<IActionResult> PerformTransaction(BankomatViewModel model)
         {
-            return new StatusCodeResult(201); //TODO
+            bool? fromActive = (await _context.Accounts.FirstOrDefaultAsync(acc => acc.Number == model.Acc))?.IsActive;
+            bool? toActive = (await _context.Accounts.FirstOrDefaultAsync(acc => acc.Number == model.To))?.IsActive;
+            await _accountsService.CreateTransactionAsync(model.Acc, fromActive==false, model.To, toActive==true, model.Sum, _context.Currencies.First(cur => cur.Name=="BYN"), _context, _contractsService.AppDateTime, true);
+            return new StatusCodeResult(201);
         }
 
         [HttpPost("getMoney")]
-        public async Task<IActionResult> GetMoney()
+        public async Task<IActionResult> GetMoney(BankomatViewModel model)
         {
-            return new StatusCodeResult(201); //TODO
+            bool? fromActive = (await _context.Accounts.FirstOrDefaultAsync(acc => acc.Number == model.Acc))?.IsActive;
+            var cassaNumber = (await _context.Accounts.FirstAsync(acc => acc.Code == _config.Value.BankAccountActive)).Number;
+            await _accountsService.CreateTransactionAsync(model.Acc, fromActive==false, cassaNumber, false, model.Sum, _context.Currencies.First(cur => cur.Name == "BYN"), _context, _contractsService.AppDateTime, true);
+            return new StatusCodeResult(201);
         }
     }
 }

@@ -11,16 +11,16 @@ namespace PiRiS_back.ViewModels
         public string Sum { get; set; }
         public string Account { get; set; }
 
-        public TransactionViewModel(Transaction transaction, Account account, ApplicationDbContext context)
+        public TransactionViewModel(Transaction transaction, Account account, Currency currency)
         {//logic based on simulating transactions rollbacks. Transactions must be enumerated from latest to earliest
             this.Id = transaction.Id;
             this.Date = transaction.Time;
-            this.Sum = $"{transaction.Sum}{context.Currencies.First(cur => cur.Id == transaction.CurrencyId).Name}";
+            this.Sum = $"{transaction.Sum}{currency.Name}";
             this.Debet = account.Debet;
             this.Credit = account.Credit;
 
-            var accountCurrencyPrice = context.Currencies.First(cur => cur.Id == account.CurrencyId).BynPrice;
-            var transactionCurrencyPrice = context.Currencies.First(cur => cur.Id == transaction.CurrencyId).BynPrice;
+            var accountCurrencyPrice = currency.BynPrice;
+            var transactionCurrencyPrice = currency.BynPrice;
 
             var sumOfChange = transaction.Sum * transactionCurrencyPrice / accountCurrencyPrice;
 

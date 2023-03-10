@@ -1,29 +1,3 @@
-/*List<List<decimal>> researched = new List<List<decimal>>();
-int n = 7;
-for (int i = 0; i<= n; i++)
-{
-    researched.Add(new List<decimal>());
-}
-decimal dx = (decimal)Math.Pow(0.1, n);
-for(int i=0; i< n; i++)
-{
-    researched[0].Add((decimal)Math.Pow(1 + (double)dx * i, 1 + (double)dx * i));
-}
-for(int i=1; i<n; i++)
-{
-    for(int j=0; j < n - i; j++)
-    {
-        researched[i].Add((researched[i - 1][j + 1] - researched[i - 1][j]) / dx);
-    }
-}
-
-List<decimal> res = new List<decimal>();
-for(int i=0; i<n; i++)
-{
-    res.Add(researched[i][0]);
-}*/
-
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using PiRiS_back.Models;

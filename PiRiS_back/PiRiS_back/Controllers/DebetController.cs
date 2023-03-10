@@ -31,7 +31,9 @@ namespace PiRiS_back.Controllers
         {
             var userName = HttpContext.User.Identity?.Name;
             var user = await _context.Users.FirstAsync(u => u.UserName == userName);
-            return new OkObjectResult(_context.DebetContracts.Where(con => con.Account1Id == user.Id).ToList());
+            var contracts = await _context.DebetContracts.Include(dc => dc.DebetContractOption).Include(con => con.Account1).Where(con => con.Account1.UserId == user.Id)
+                .Select(dc => new ContractViewModel(dc, _context)).ToListAsync();
+            return new OkObjectResult(contracts);
         }
 
         [HttpGet("contract-number/{id}")]
@@ -46,12 +48,12 @@ namespace PiRiS_back.Controllers
         [AuthFilter]
         public async Task<IActionResult> GetDebetContract(int? id)
         {
-            var contract = await _context.DebetContracts.FirstOrDefaultAsync(dc => dc.Id == id);
+            var contract = await _context.DebetContracts.Include(dc => dc.DebetContractOption).Include(con => con.Account1).FirstOrDefaultAsync(dc => dc.Id == id);
             var userName = HttpContext.User.Identity?.Name;
             var user = await _context.Users.FirstAsync(u => u.UserName == userName);
 
             if(contract == null) return new BadRequestObjectResult($"Invalid debet contract Id: {id}");
-            if (contract.Account1Id != user.Id) return new StatusCodeResult(403);
+            if (contract.Account1.UserId != user.Id) return new StatusCodeResult(403);
 
             return new OkObjectResult(new ContractViewModel(contract, _context));
         }
@@ -60,7 +62,7 @@ namespace PiRiS_back.Controllers
         [AuthFilter] //Admin only
         public async Task<IActionResult> GetAllDebetContractsList()
         {
-            return new OkObjectResult(await _context.DebetContracts.ToListAsync());
+            return new OkObjectResult(await _context.DebetContracts.Include(dc => dc.DebetContractOption).Select(dc => new ContractViewModel(dc, _context)).ToListAsync());
         }
 
         [HttpGet("options")]
@@ -81,9 +83,10 @@ namespace PiRiS_back.Controllers
 
         [HttpPost("options/{id}")]
         [AuthFilter]
-        public async Task<IActionResult> SignDebetContract(int? id, ContractViewModel contract)
+        public async Task<IActionResult> SignDebetContract(int? id, [FromForm]ContractViewModel contract)
         {
             contract.OptionId = id;
+            contract.PercentPerYear /= 100;
             var userName = HttpContext.User.Identity?.Name;
             try
             {

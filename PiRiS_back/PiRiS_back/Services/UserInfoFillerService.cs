@@ -28,7 +28,7 @@ namespace PiRiS_back.Services
             if (String.IsNullOrEmpty(user.PassportGivenBy)) throw new UserValidationException("Орган выдачи паспорта не должен быть пустым!");
             if (user.PassportGivenAt < user.BirthDate) throw new UserValidationException("Дата выдачи паспорта не может быть меньше даты рождения!");
             if (String.IsNullOrEmpty(user.PassportIdentityNumber)) throw new UserValidationException("Идентификационный номер паспорта не должен быть пустым!");
-            if (!Regex.IsMatch(user.PassportIdentityNumber, @"^\d{7}\w\d{3}\w{2}\d$")) throw new UserValidationException("Неверный идентификационный номер паспорта!"); //TODO
+            if (!Regex.IsMatch(user.PassportIdentityNumber, @"^\d{7}\w\d{3}\w{2}\d$")) throw new UserValidationException("Неверный идентификационный номер паспорта!");
             if (isNew && context.Users.Any(us => user.PassportIdentityNumber == us.PassportIdentityNumber)) 
                 throw new UserValidationException("Пользователь с данным идентификационным номером пасспорта уже зарегистрирован!");
 
@@ -36,8 +36,8 @@ namespace PiRiS_back.Services
             if (String.IsNullOrEmpty(user.City)) throw new UserValidationException("Город проживания не должен быть пустым!");
             if (!context.Cities.Any(cit => cit.Name == user.City)) throw new UserValidationException($"Город проживания {user.City} отсутствует в базе!");
             if (String.IsNullOrEmpty(user.AddressLiving)) throw new UserValidationException("Адрес проживания не должен быть пустым!");
-            if (!String.IsNullOrEmpty(user.HomePhone) && !Regex.IsMatch(user.HomePhone, @"^\d{6,8}$")) throw new UserValidationException("Неверный домашний телефон!"); //TODO
-            if (!String.IsNullOrEmpty(user.MobilePhone) && !Regex.IsMatch(user.MobilePhone, @"^([+]\d{12})|(\d{11})$")) throw new UserValidationException("Неверный мобильный телефон!"); //TODO
+            if (!String.IsNullOrEmpty(user.HomePhone) && !Regex.IsMatch(user.HomePhone, @"^\d{6,8}$")) throw new UserValidationException("Неверный домашний телефон!");
+            if (!String.IsNullOrEmpty(user.MobilePhone) && !Regex.IsMatch(user.MobilePhone, @"^([+]\d{12})|(\d{11})$")) throw new UserValidationException("Неверный мобильный телефон!");
             if (!String.IsNullOrEmpty(user.EmailAddress) && !Regex.IsMatch(user.EmailAddress, @"^\S+?@\S+?[.]\w{2,3}$")) throw new UserValidationException("Неверный адрес электронной почты!");
             if (String.IsNullOrEmpty(user.CityRegistered)) throw new UserValidationException("Город прописки не должен быть пустым!");
             if (!context.Cities.Any(cit => cit.Name == user.CityRegistered)) throw new UserValidationException($"Город прописки {user.CityRegistered} отсутствует в базе!");

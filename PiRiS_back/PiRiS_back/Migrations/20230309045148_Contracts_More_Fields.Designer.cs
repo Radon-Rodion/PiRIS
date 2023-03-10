@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiRiS_back;
 
@@ -11,9 +12,11 @@ using PiRiS_back;
 namespace PiRiSback.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230309045148_Contracts_More_Fields")]
+    partial class ContractsMoreFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -848,13 +851,13 @@ namespace PiRiSback.Migrations
                     b.HasOne("PiRiS_back.Models.Account", "Account1")
                         .WithMany()
                         .HasForeignKey("Account1Id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PiRiS_back.Models.Account", "Account2")
                         .WithMany()
                         .HasForeignKey("Account2Id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PiRiS_back.Models.City", "CityLiving")
@@ -891,13 +894,13 @@ namespace PiRiSback.Migrations
                     b.HasOne("PiRiS_back.Models.Account", "Account1")
                         .WithMany()
                         .HasForeignKey("Account1Id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PiRiS_back.Models.Account", "Account2")
                         .WithMany()
                         .HasForeignKey("Account2Id")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PiRiS_back.Models.City", "CityLiving")
