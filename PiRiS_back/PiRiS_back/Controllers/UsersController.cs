@@ -120,6 +120,10 @@ namespace PiRiS_back.Controllers
         public async Task<IActionResult> DeleteCurrentUser()
         {
             var currUser = await _context.Users.FirstAsync(u => u.UserName == HttpContext.User.Identity.Name);
+            if (_context.CreditContracts.Include(cc => cc.Account1).Include(cc => cc.Account2)
+                .Any(cc => cc.PassportIdentityNumber == currUser.PassportIdentityNumber && (cc.Account1.Credit + cc.Account1.Debet < 0 || cc.Account2.Credit + cc.Account2.Debet < 0)))
+                return new BadRequestObjectResult("У Вас есть незакрытый кредит!");
+
             HttpContext.Session.Remove(currUser.UserName ?? ""); //if user tries to delete himself then he will be logged out
             _context.Remove(currUser);
             await _context.SaveChangesAsync();
@@ -136,6 +140,10 @@ namespace PiRiS_back.Controllers
                 return new NoContentResult();
             }
             var currUserName = HttpContext.User.Identity?.Name;
+
+            if (_context.CreditContracts.Include(cc => cc.Account1).Include(cc => cc.Account2)
+                .Any(cc => cc.PassportIdentityNumber == userToDelete.PassportIdentityNumber && (cc.Account1.Credit + cc.Account1.Debet < 0 || cc.Account2.Credit + cc.Account2.Debet < 0)))
+                return new BadRequestObjectResult("У данного пользователя есть незакрытый кредит!");
 
             if (userToDelete.UserName == currUserName) //if user tries to delete himself then he will be logged out
             {

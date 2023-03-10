@@ -95,7 +95,8 @@ namespace PiRiS_back.Controllers
         {
             bool? fromActive = (await _context.Accounts.FirstOrDefaultAsync(acc => acc.Number == model.Acc))?.IsActive;
             var cassaNumber = (await _context.Accounts.FirstAsync(acc => acc.Code == _config.Value.BankAccountActive)).Number;
-            await _accountsService.CreateTransactionAsync(model.Acc, fromActive==false, cassaNumber, false, model.Sum, _context.Currencies.First(cur => cur.Name == "BYN"), _context, _contractsService.AppDateTime, true);
+            await _accountsService.CreateTransactionAsync(model.Acc, fromActive==false, cassaNumber, true, model.Sum, _context.Currencies.First(cur => cur.Name == "BYN"), _context, _contractsService.AppDateTime, true);
+            await _accountsService.CreateTransactionAsync(cassaNumber, false, "", false, model.Sum, _context.Currencies.First(cur => cur.Name == "BYN"), _context, _contractsService.AppDateTime, true);
             return new StatusCodeResult(201);
         }
     }

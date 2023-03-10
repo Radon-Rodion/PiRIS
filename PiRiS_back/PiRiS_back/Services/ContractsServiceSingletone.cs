@@ -80,7 +80,8 @@ namespace PiRiS_back.Services
                 Debet = 0,
                 Credit = 0,
                 Currency = contractCurrency,
-                IsActive = false
+                IsActive = false,
+                IsWorking = true,
             };
             var newAccountForPercents = new Account()
             {
@@ -91,10 +92,11 @@ namespace PiRiS_back.Services
                 Debet = 0,
                 Credit = 0,
                 Currency = contractCurrency,
-                IsActive = false
+                IsActive = false,
+                IsWorking = true,
             };
 
-            await accountsService.CreateTransactionAsync("", false, newAccountForMainSum.Number, true, contract.Sum, contractCurrency, context, AppDateTime); //To cassa debet
+            await accountsService.CreateTransactionAsync("", false, bankAcountActive.Number, true, contract.Sum, contractCurrency, context, AppDateTime); //To cassa debet
             await accountsService.CreateTransactionAsync(bankAcountActive, false, newAccountForMainSum, false, contract.Sum, contractCurrency, context, AppDateTime); //From cassa credit to main credit
             //if(contract.IsRequestable == false) 
                 await accountsService.CreateTransactionAsync(newAccountForMainSum, true, bankAccountPassive, false, contract.Sum, contractCurrency, context, AppDateTime); //From main debet to bank credit
@@ -145,7 +147,8 @@ namespace PiRiS_back.Services
                 Debet = 0,
                 Credit = 0,
                 Currency = contractCurrency,
-                IsActive = true
+                IsActive = true,
+                IsWorking = true,
             };
             var newAccountForPercents = new Account()
             {
@@ -156,7 +159,8 @@ namespace PiRiS_back.Services
                 Debet = 0,
                 Credit = 0,
                 Currency = contractCurrency,
-                IsActive = true
+                IsActive = true,
+                IsWorking = true,
             };
 
             await accountsService.CreateTransactionAsync(bankAccountPassive, true, newAccountForMainSum, true, contract.Sum, contractCurrency, context, AppDateTime); //From bank debet to main debet
@@ -223,13 +227,13 @@ namespace PiRiS_back.Services
             long maxNumber = 0;
             if (isDebet && await context.DebetContracts.AnyAsync())
             {
-                maxNumber = await context.DebetContracts.MaxAsync(dc => System.Convert.ToInt64(dc.Number));
+                maxNumber = await context.Accounts.MaxAsync(acc => System.Convert.ToInt64(acc.Code.Substring(1))) + 3000L;
             }
             if(!isDebet && await context.CreditContracts.AnyAsync())
             {
-                maxNumber = await context.CreditContracts.MaxAsync(cc => System.Convert.ToInt64(cc.Number));
+                maxNumber = await context.Accounts.MaxAsync(acc => System.Convert.ToInt64(acc.Code.Substring(1))) + 2000L;
             }
-            if (maxNumber == 0) return isDebet ? 3000 : 2000;
+            if (maxNumber == 0) return isDebet ? 3000L : 2000L;
             return maxNumber + 1;
         }
 
@@ -269,21 +273,25 @@ namespace PiRiS_back.Services
             {
                 if (dc.StartDate >= AppDateTime) continue;
                 var dco = await context.DebetContractOptions.FirstAsync(dco => dco.Id == dc.DebetContractOptionId);
-                var monthGone = (AppDateTime - dc.StartDate).TotalDays / 30d;
-                if (dc.EndDate >= AppDateTime && isInteger(monthGone)) //fullfilling percents
+                if (dc.EndDate >= AppDateTime) //fullfilling percents every day
                 {
                     if(dco.IsRequestable)
                     {
                         var mainAcc = await context.Accounts.FirstAsync(acc => acc.Id == dc.Account1Id);
-                        var percentsSum = mainAcc.Credit * (dc.PercentPerYear / 12);
+                        var percentsSum = mainAcc.Credit * (dc.PercentPerYear / 365);
                         await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account2, false, percentsSum, dc.Currency, context, AppDateTime);
                     }
                 }
-                if((dc.EndDate.Day == AppDateTime.Day && dc.EndDate.Month == AppDateTime.Month && dc.EndDate.Year == AppDateTime.Year) && !dco.IsRequestable) //deposit end
+                if((dc.EndDate.Day == AppDateTime.Day && dc.EndDate.Month == AppDateTime.Month && dc.EndDate.Year == AppDateTime.Year)) //deposit end
                 {
-                    var duration = (int)Math.Round((dc.EndDate - dc.StartDate).TotalDays / 30d);
-                    await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account2, false, dc.Sum * (dc.PercentPerYear * duration / 12), dc.Currency, context, AppDateTime); //percents
+                    if (!dco.IsRequestable)
+                    {
+                        var duration = (decimal)(dc.EndDate - dc.StartDate).TotalDays;
+                        await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account2, false, dc.Sum * (dc.PercentPerYear * duration / 365), dc.Currency, context, AppDateTime); //percents
+                    }
                     await accountsService.CreateTransactionAsync(bankAccountPassive, true, dc.Account1, false, dc.Sum, dc.Currency, context, AppDateTime); //body
+                    dc.Account1.IsWorking = false;
+                    dc.Account2.IsWorking = false;
                 }
             }
             foreach (var cc in await context.CreditContracts.Include(cc => cc.Account1).Include(cc => cc.Account2).Include(dc => dc.Currency).ToListAsync())
@@ -296,10 +304,9 @@ namespace PiRiS_back.Services
                 {
                     if (cco.IsDifferentive)
                     {
-                        var percentsToPay = (cc.PercentPerYear / 12) * (cc.Sum * (decimal)((monthDuration - monthGone + 1) / monthDuration));
-                        var bodyToPay = cc.Sum * (decimal)(1 / monthDuration);
+                        var percentsToPay = (cc.PercentPerYear / 12) * cc.Sum;
+                        //var bodyToPay = cc.Sum * (decimal)(1 / monthDuration);
                         await accountsService.CreateTransactionAsync(cc.Account2, false, bankAccountPassive, false, percentsToPay, cc.Currency, context, AppDateTime);
-                        await accountsService.CreateTransactionAsync(cc.Account1, false, bankAccountPassive, false, bodyToPay, cc.Currency, context, AppDateTime);
                     } else
                     {
                         var percMonth = (cc.PercentPerYear / 12);
@@ -314,6 +321,11 @@ namespace PiRiS_back.Services
                 }
                 if (cc.EndDate.Day == AppDateTime.Day && cc.EndDate.Month == AppDateTime.Month && cc.EndDate.Year == AppDateTime.Year) //credit end
                 {
+                    cc.Account1.IsWorking = false;
+                    cc.Account2.IsWorking = false;
+                    if (cco.IsDifferentive) {
+                        await accountsService.CreateTransactionAsync(cc.Account1, false, bankAccountPassive, false, cc.Sum, cc.Currency, context, AppDateTime);
+                    }
                     //await accountsService.CreateTransactionAsync(cc.Account1, false, bankAccountPassive, false, cc.Sum, cc.Currency, context, AppDateTime);
                 }
             }

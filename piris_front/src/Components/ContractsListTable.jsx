@@ -52,7 +52,8 @@ const ContractsListTable = ({ contractsList, redirectPath, isDebet = true }) => 
             flex: 0.15,
             headerClassName: 'subtext',
             headerAlign: 'left',
-            align: 'left'
+            align: 'left',
+            renderCell: (props) => (`${props.row.percentPerYear*100}%`)
         },
         {
             field: 'startDate',

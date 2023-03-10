@@ -21,7 +21,7 @@ const TransactionsListTable = ({accState}) => {
         },
         {
             field: 'debet',
-            headerName: 'Дебет после',
+            headerName: 'Дебет после операции',
             flex: 0.15,
             headerClassName: 'subtext',
             headerAlign: 'left',
@@ -29,7 +29,7 @@ const TransactionsListTable = ({accState}) => {
         },
         {
             field: 'credit',
-            headerName: 'Кредит после',
+            headerName: 'Кредит после операции',
             flex: 0.15,
             headerClassName: 'subtext',
             headerAlign: 'left',
@@ -37,7 +37,7 @@ const TransactionsListTable = ({accState}) => {
         },
         {
             field: 'sum',
-            headerName: 'Сумма',
+            headerName: 'Переведено',
             flex: 0.15,
             headerClassName: 'subtext',
             headerAlign: 'left',
@@ -54,7 +54,7 @@ const TransactionsListTable = ({accState}) => {
     ];
 
     return <>
-        Счёт: {accState.account.code} {accState.account.number}
+        Счёт: <span style={{color: accState.account.isWorking ? 'black' : 'red'}}>{accState.account.code} {accState.account.number}</span>
         <DataGrid
             headerHeight={100}
             rowHeight={27}
@@ -65,7 +65,7 @@ const TransactionsListTable = ({accState}) => {
             pageSize={10}
             pagination
             sx={{
-                height: '35vh',
+                height: '59vh',
                 my: '35px',
                 '& .MuiDataGrid-columnHeaderTitle': {
                     textOverflow: "clip",

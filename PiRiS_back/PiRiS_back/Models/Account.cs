@@ -13,5 +13,6 @@
         public decimal Credit { get; set; }
         public int CurrencyId { get; set; }
         public Currency Currency { get; set; }
+        public bool IsWorking { get; set; }
     }
 }
